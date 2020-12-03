@@ -31,10 +31,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect("mongodb://localhost:27017/poeticaDB", {
+// mongoose.connect("mongodb://localhost:27017/poeticaDB", {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true
+// });
+
+mongoose.connect("mongodb+srv://mar-admin:" + process.env.MONGO_ADMIN_PASSWORD + "@cluster0.0saax.mongodb.net/poetikaDB?retryWrites=true&w=majority", {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
+
 mongoose.set("useCreateIndex", true);
 
 const userSchema = mongoose.Schema({
