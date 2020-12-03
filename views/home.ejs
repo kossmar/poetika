@@ -1,0 +1,37 @@
+<%- include("partials/header") %>
+
+<div class="album">
+    <div class="container">
+        <div class="row">
+            <% poemArr.forEach((poem) => { %>
+            <div class="full-width">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h4><%=poem.title%> </h4>
+                        <p class="card-text"><%=poem.body%>.</p>
+                        <div class="author">
+                            <p><%=poem.penName%></p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <a role="button" class="btn btn-sm btn-outline-secondary"
+                                    href="/poems/<%=poem._id%>">View</a>
+                                <% if (poem.userId === currentUser.id)  { %>
+                                <a role="button" class="btn btn-sm btn-outline-secondary"
+                                    href="/poems/<%=poem._id%>">Edit</a>
+                                <% } %>
+                                <!-- <button type="button" class="btn btn-sm btn-outline-secondary edit-btn">Edit</button> -->
+                            </div>
+                            <% var date = new Date(poem.timeStamp).toLocaleDateString('en-gb', {year: 'numeric', month: 'long', day: 'numeric', timeZone: 'utc', hour: "numeric", minute: "numeric"}) %>
+                            <small class="text-muted"> <%=date%> </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+    </div>
+</div>
+
+
+<%- include("partials/footer") %>

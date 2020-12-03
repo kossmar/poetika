@@ -1,0 +1,30 @@
+<%- include("partials/header") %>
+
+<div class="pt-5 row">
+    <div class="form-group col-md-9 penName-div">
+        <form action="/change_pen_name" method="POST">
+            <div class="form-group">
+                <label for="">Current Pen Name: <%=currentUser.penName%></label>
+                <input class="form-control restrained" type="text" name="newPenName" placeholder="New Pen Name">
+            </div>
+            <div>
+                <button type="submit" class="btn btn-dark" href="#">Change Pen Name</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container-fluid col-md-3">
+        <div class="">
+            <form class="" action="/logout" method="POST">
+                <div class="logout-div">
+                    <button type="submit" class="btn btn-dark">Log Out</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+<%- include("partials/footer") %>
