@@ -43,12 +43,6 @@ app.use((req, res, next) => {
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-// mongoose.connect("mongodb://localhost:27017/poeticaDB", {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true
-// });
-
 mongoose.connect("mongodb+srv://mar-admin:" + process.env.MONGO_ADMIN_PASSWORD + "@cluster0.0saax.mongodb.net/poetikaDB?retryWrites=true&w=majority", {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -64,9 +58,7 @@ const userSchema = mongoose.Schema({
     resetPasswordExpires: Date
 });
 
-userSchema.plugin(passportLocalMongoose, {
-    passwordValidator: true
-});
+userSchema.plugin(passportLocalMongoose);
 
 const User = new mongoose.model("User", userSchema);
 
@@ -86,6 +78,7 @@ passport.use(
                     }
                 })
             });
+
         }
     ));
 
@@ -149,6 +142,7 @@ app.get("/poems/:poemId", (req, res) => {
 app.get("/login", (req, res) => {
     res.render("login", {
         isAuthenticated: isAuthenticated,
+        messages: req.flash("error_msg")
     });
 
 });
@@ -159,7 +153,7 @@ app.post("/login", (req, res, next) => {
             successRedirect: "/",
             failureRedirect: "/login",
             failureFlash: true
-        })(req, res, next)
+        })(req, res, next);
 });
 
 app.get("/register", (req, res) => {
@@ -168,22 +162,67 @@ app.get("/register", (req, res) => {
     });
 })
 
-app.post("/register", (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-    const penName = req.body.penName;
-    console.log(req.body);
+app.post("/register", async (req, res) => {
+    const { penName, username, password, passwordConf } = req.body;
 
-    User.register({ username: username, penName: penName }, password, (err, user) => {
-        if (err) {
-            console.log(err);
-            res.redirect("/register");
-        } else {
-            passport.authenticate("local")(req, res, function () {
-                res.redirect("/");
-            });
-        }
-    });
+    const errors = [];
+
+    if (!penName || !username || !password || !passwordConf) {
+        errors.push({ msg: "Please fill in all fields" });
+    }
+
+    // Check if passwords match
+    if (password !== passwordConf) {
+        errors.push({ msg: "Passwords don't match" })
+    }
+
+    // Check if pen name is taken
+    let promise = new Promise((resolve, reject) => {
+        User.findOne({ penName: penName }, (err, foundUser) => {
+            if (foundUser) {
+                errors.push({ msg: "Pen Name is taken" });
+                resolve();
+            } else {
+                resolve();
+            }
+        })
+    })
+
+    let promise2 = new Promise((resolve, reject) => {
+        // Check if e-mail address is registered
+        User.findOne({ username: username }, (err, foundUser) => {
+            if (foundUser) {
+                errors.push({ msg: "This e-mail address is already registered" });
+                resolve();
+            } else {
+                User.register({ username: username, penName: penName }, password, (err, user) => {
+                    if (err) {
+                        console.log(err);
+                        res.redirect("/register");
+                    } else {
+                        passport.authenticate("local")(req, res, function () {
+                            res.redirect("/");
+                        });
+                    }
+                });
+            }
+        });
+    })
+
+    let result = await promise;
+    let result2 = await promise2;
+
+    if (errors.length > 0) {
+        res.render("register", {
+            isAuthenticated: isAuthenticated,
+            errors: errors,
+            penName: penName,
+            username: username,
+            password: password,
+            passwordConf: passwordConf
+        })
+    }
+
 });
 
 app.post("/logout", (req, res) => {
