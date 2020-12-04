@@ -6,7 +6,9 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const cookieParser = require("cookie-parser");
 const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
 const passportLocalMongoose = require("passport-local-mongoose");
 const alert = require("alert");
 const nodemailer = require("nodemailer");
@@ -14,11 +16,13 @@ const SMTPConnection = require("nodemailer/lib/smtp-connection");
 const crypto = require("crypto");
 const { doesNotMatch } = require("assert");
 const async = require("async");
+const flash = require("connect-flash");
 
 const app = express();
 
 app.set("view engine", "ejs");
 
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
@@ -28,8 +32,17 @@ app.use(session({
     saveUninitialized: true,
 }))
 
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    next();
+})
+
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 // mongoose.connect("mongodb://localhost:27017/poeticaDB", {
 //     useNewUrlParser: true,
@@ -51,11 +64,30 @@ const userSchema = mongoose.Schema({
     resetPasswordExpires: Date
 });
 
-userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(passportLocalMongoose, {
+    passwordValidator: true
+});
 
 const User = new mongoose.model("User", userSchema);
 
-passport.use(User.createStrategy());
+passport.use(
+    new LocalStrategy(
+        function (username, password, done) {
+            User.findOne({ username: username }, function (err, user) {
+                if (err) { return done(err); }
+                if (!user) {
+                    return done(null, false, { message: 'Incorrect E-mail.' });
+                }
+                user.authenticate(password, (err, model, passwordError) => {
+                    if (passwordError) {
+                        return done(null, false, { message: 'Incorrect Password.' });
+                    }
+                })
+                return done(null, user);
+            });
+        }
+    ));
+
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -98,12 +130,10 @@ app.get("/", (req, res) => {
 app.get("/poems/:poemId", (req, res) => {
 
     const requestedPoemId = req.params.poemId;
-    console.log("REQUESTED ID: " + requestedPoemId);
 
     Poem.findOne({ _id: requestedPoemId }, (err, foundPoem) => {
         console.log(foundPoem);
         if (err) {
-            console.log("THE FUCK IS THIS??: " + err);
         } else {
             res.render("poem", {
                 isAuthenticated: isAuthenticated,
@@ -119,15 +149,17 @@ app.get("/login", (req, res) => {
     res.render("login", {
         isAuthenticated: isAuthenticated,
     });
+
 });
 
-app.post("/login",
+app.post("/login", (req, res, next) => {
     passport.authenticate("local",
         {
             successRedirect: "/",
             failureRedirect: "/login",
-        })
-);
+            failureFlash: true
+        })(req, res, next)
+});
 
 app.get("/register", (req, res) => {
     res.render("register", {
@@ -431,7 +463,7 @@ app.post("/change_pen_name", (req, res) => {
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 3000;
+    port = 3000;
 }
 app.listen(port, () => {
     console.log("Server started running on port 3000");
