@@ -81,9 +81,10 @@ passport.use(
                 user.authenticate(password, (err, model, passwordError) => {
                     if (passwordError) {
                         return done(null, false, { message: 'Incorrect Password.' });
+                    } else {
+                        return done(null, user);
                     }
                 })
-                return done(null, user);
             });
         }
     ));
