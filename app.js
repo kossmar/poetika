@@ -9,6 +9,7 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 const passportLocalMongoose = require("passport-local-mongoose");
 const alert = require("alert");
 const nodemailer = require("nodemailer");
@@ -17,6 +18,8 @@ const crypto = require("crypto");
 const { doesNotMatch } = require("assert");
 const async = require("async");
 const flash = require("connect-flash");
+const findOrCreate = require('mongoose-findorcreate');
+
 
 const app = express();
 
@@ -59,9 +62,12 @@ const userSchema = mongoose.Schema({
 });
 
 userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
 
 const User = new mongoose.model("User", userSchema);
 
+
+// Passport Local Strategy
 passport.use(
     new LocalStrategy(
         function (username, password, done) {
@@ -82,8 +88,31 @@ passport.use(
         }
     ));
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.use(
+    new FacebookStrategy({
+        clientID: process.env.FACEBOOK_ID,
+        clientSecret: process.env.FACEBOOK_SECRET,
+        callbackURL: "http://localhost:3000/auth/facebook/poetika"
+    },
+        (accessToken, refreshToken, profile, cb) => {
+            console.log(profile);
+            User.findOrCreate({ facebookId: profile.id }, (err, user) => {
+                return cb(err, user);
+            })
+        }));
+
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser(function (id, done) {
+    User.findById(id, (err, user) => {
+        done(err, user);
+    });
+});
 
 var isAuthenticated = false;
 
@@ -224,6 +253,17 @@ app.post("/register", async (req, res) => {
     }
 
 });
+
+// Facebook Auth 
+app.get('/auth/facebook',
+    passport.authenticate('facebook', { scope: ["profile"] }));
+
+app.get('/auth/facebook/poetika',
+    passport.authenticate('facebook', { failureRedirect: '/login' }),
+    function (req, res) {
+        // Successful authentication, redirect home.
+        res.redirect('/');
+    });
 
 app.post("/logout", (req, res) => {
     req.logout();
