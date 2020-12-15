@@ -10,6 +10,7 @@ const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passportLocalMongoose = require("passport-local-mongoose");
 const alert = require("alert");
 const nodemailer = require("nodemailer");
@@ -57,6 +58,8 @@ const userSchema = mongoose.Schema({
     email: String,
     password: String,
     penName: String,
+    googleId: String,
+    facebookId: String,
     resetPasswordToken: String,
     resetPasswordExpires: Date
 });
@@ -88,6 +91,7 @@ passport.use(
         }
     ));
 
+// Passport Facebook Strategy
 passport.use(
     new FacebookStrategy({
         clientID: process.env.FACEBOOK_ID,
@@ -100,6 +104,22 @@ passport.use(
                 return cb(err, user);
             })
         }));
+
+// Passport Google Strategy
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/poetika",
+    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+      console.log(profile);
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        console.log(user);
+      return cb(err, user);
+    });
+  }
+));
 
 // passport.serializeUser(User.serializeUser());
 // passport.deserializeUser(User.deserializeUser());
@@ -135,7 +155,6 @@ app.get("/", (req, res) => {
     console.log("Is Authenticated: " + isAuthenticated);
     if (isAuthenticated) {
         currentUser = req.user;
-        console.log("HOME - CURRENT USER: " + currentUser);
     }
     Poem.find((err, foundPoems) => {
         if (err) {
@@ -256,7 +275,7 @@ app.post("/register", async (req, res) => {
 
 // Facebook Auth 
 app.get('/auth/facebook',
-    passport.authenticate('facebook', { scope: ["profile"] }));
+    passport.authenticate('facebook'));
 
 app.get('/auth/facebook/poetika',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
@@ -270,6 +289,17 @@ app.post("/logout", (req, res) => {
     isAuthenticated = false;
     res.redirect("/");
 });
+
+// Google Auth
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile'] }));
+
+app.get('/auth/google/poetika', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
 
 // RESET PASSWORD
 
@@ -520,17 +550,19 @@ app.post("/change_pen_name", (req, res) => {
         const newPenName = req.body.newPenName;
         User.findOne({ _id: currentUserId }, (err, foundUser) => {
             if (foundUser) {
-                console.log("currentPenName: " + foundUser.penName);
-                console.log("newPenName: " + newPenName);
+                console.log(foundUser);
+                // console.log("currentPenName: " + foundUser.penName);
+                // console.log("newPenName: " + newPenName);
                 foundUser.penName = newPenName;
 
                 foundUser.save()
-                console.log("currentUserId: " + currentUserId);
+                console.log(foundUser);
+                // console.log("currentUserId: " + currentUserId);
                 Poem.updateMany({ userId: currentUserId }, { penName: newPenName }, (err, foundPoems) => {
                     if (err) {
                         console.log(err);
                     } else {
-                        console.log("Updated Docs : ", foundPoems);
+                        // console.log("Updated Docs : ", foundPoems);
                         res.redirect("/account");
                     }
                 });
