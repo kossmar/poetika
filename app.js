@@ -96,7 +96,7 @@ passport.use(
     new FacebookStrategy({
         clientID: process.env.FACEBOOK_ID,
         clientSecret: process.env.FACEBOOK_SECRET,
-        callbackURL: "/auth/facebook/poetika"
+        callbackURL: "https://poetika.herokuapp.com/auth/facebook/poetika"
     },
         (accessToken, refreshToken, profile, cb) => {
             console.log(profile);
