@@ -69,7 +69,6 @@ userSchema.plugin(findOrCreate);
 
 const User = new mongoose.model("User", userSchema);
 
-
 // Passport Local Strategy
 passport.use(
     new LocalStrategy(
