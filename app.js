@@ -96,11 +96,15 @@ passport.use(
     new FacebookStrategy({
         clientID: process.env.FACEBOOK_ID,
         clientSecret: process.env.FACEBOOK_SECRET,
-        callbackURL: "http://localhost:3000/auth/facebook/poetika"
+        callbackURL: "/auth/facebook/poetika"
     },
         (accessToken, refreshToken, profile, cb) => {
             console.log(profile);
             User.findOrCreate({ facebookId: profile.id }, (err, user) => {
+                if (user.penName === undefined || user.penName === "") {
+                    user.penName = profile.displayName;
+                    user.save();
+                }
                 return cb(err, user);
             })
         }));
@@ -109,13 +113,17 @@ passport.use(
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/poetika",
+    callbackURL: "/auth/google/poetika",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
   },
   function(accessToken, refreshToken, profile, cb) {
       console.log(profile);
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
         console.log(user);
+        if (user.penName === undefined || user.penName === "") {
+            user.penName = profile.displayName;
+            user.save();
+        }
       return cb(err, user);
     });
   }
