@@ -291,7 +291,7 @@ app.get('/auth/facebook/poetika',
         res.redirect('/');
     });
 
-app.post("/logout", (req, res) => {
+app.post("/auth/logout", (req, res) => {
     req.logout();
     isAuthenticated = false;
     res.redirect("/");
