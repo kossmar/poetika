@@ -194,7 +194,7 @@ app.get("/poems/:poemId", (req, res) => {
 
 // AUTHENTICATE
 
-app.get("/login", (req, res) => {
+app.get("/auth/login", (req, res) => {
     res.render("login", {
         isAuthenticated: isAuthenticated,
         messages: req.flash("error_msg")
@@ -202,7 +202,7 @@ app.get("/login", (req, res) => {
 
 });
 
-app.post("/login", (req, res, next) => {
+app.post("/auth/login", (req, res, next) => {
     passport.authenticate("local",
         {
             successRedirect: "/",
@@ -211,13 +211,13 @@ app.post("/login", (req, res, next) => {
         })(req, res, next);
 });
 
-app.get("/register", (req, res) => {
+app.get("/auth/register", (req, res) => {
     res.render("register", {
         isAuthenticated: isAuthenticated,
     });
 })
 
-app.post("/register", async (req, res) => {
+app.post("/auth/register", async (req, res) => {
     const { penName, username, password, passwordConf } = req.body;
 
     const errors = [];
@@ -291,7 +291,7 @@ app.get('/auth/facebook/poetika',
         res.redirect('/');
     });
 
-app.post("/logout", (req, res) => {
+app.post("/auth/logout", (req, res) => {
     req.logout();
     isAuthenticated = false;
     res.redirect("/");
@@ -315,7 +315,7 @@ var forgotAlert = {
     message: ""
 }
 
-app.get("/forgotPassword", (req, res) => {
+app.get("/auth/forgotPassword", (req, res) => {
 
     res.render("forgot-password", {
         isAuthenticated: isAuthenticated,
@@ -325,7 +325,7 @@ app.get("/forgotPassword", (req, res) => {
     forgotAlert.message = "";
 });
 
-app.post("/forgotPassword", (req, res) => {
+app.post("/auth/forgotPassword", (req, res) => {
 
     const email = req.body.email
     console.log(email);
@@ -405,7 +405,7 @@ var resetAlert = {
     message: ""
 }
 
-app.get("/resetPassword/:token", (req, res) => {
+app.get("/auth/resetPassword/:token", (req, res) => {
     const token = req.params.token
     User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } }, (err, foundUser) => {
         if (err) {
@@ -425,7 +425,7 @@ app.get("/resetPassword/:token", (req, res) => {
     });
 });
 
-app.post("/resetPassword/:token", (req, res) => {
+app.post("/auth/resetPassword/:token", (req, res) => {
     console.log(req.body.password);
 
     async.waterfall([
@@ -496,7 +496,7 @@ app.post("/resetPassword/:token", (req, res) => {
 
 // COMPOSE
 
-app.get("/compose", (req, res) => {
+app.get("/poems/compose", (req, res) => {
     // console.log(req.user.id);
     const isAuthenticated = req.isAuthenticated();
     if (isAuthenticated) {
@@ -508,7 +508,7 @@ app.get("/compose", (req, res) => {
     }
 });
 
-app.post("/compose", (req, res) => {
+app.post("/poems/compose", (req, res) => {
     console.log("NEW POEM: " + req.body);
     const title = req.body.title;
     const body = req.body.body;
@@ -551,7 +551,7 @@ app.get("/account", (req, res) => {
     }
 });
 
-app.post("/change_pen_name", (req, res) => {
+app.post("/account/change_pen_name", (req, res) => {
     if (isAuthenticated) {
         const currentUserId = req.user.id;
         const newPenName = req.body.newPenName;
@@ -576,7 +576,7 @@ app.post("/change_pen_name", (req, res) => {
             }
         })
     } else {
-        res.redirect("/login");
+        res.redirect("/auth/login");
     }
 });
 

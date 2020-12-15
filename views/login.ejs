@@ -9,7 +9,7 @@
         <div class="card-body">
 
           <!-- Makes POST request to /login route -->
-          <form action="/login" method="POST">
+          <form action="/auth/login" method="POST">
             <div class="form-group">
               <label for="email">E-mail</label>
               <input type="email" class="form-control" name="username">
@@ -25,8 +25,8 @@
           <%- include("partials/messages") %>
 
           <div>
-            <a href="/register" class="btn btn-link login-link">Don't have an account?</a>
-            <a href="/forgotPassword" class="btn btn-link login-link">Forgot your password?</a>
+            <a href="/auth/register" class="btn btn-link login-link">Don't have an account?</a>
+            <a href="/auth/forgotPassword" class="btn btn-link login-link">Forgot your password?</a>
           </div>
         </div>
       </div>
