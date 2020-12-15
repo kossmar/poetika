@@ -101,7 +101,7 @@ passport.use(
         (accessToken, refreshToken, profile, cb) => {
             console.log(profile);
             User.findOrCreate({ facebookId: profile.id }, (err, user) => {
-                if (user.penName === undefined || user.penName === "") {
+                if (!user.penName) {
                     user.penName = profile.displayName;
                     user.save();
                 }
@@ -120,7 +120,7 @@ passport.use(new GoogleStrategy({
       console.log(profile);
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
         console.log(user);
-        if (user.penName === undefined || user.penName === "") {
+        if (!user.penName) {
             user.penName = profile.displayName;
             user.save();
         }
