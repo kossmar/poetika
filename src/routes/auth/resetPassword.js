@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const { User } = require("../../models/User");
 const Messages = require("../../messages");
+const e = require("express");
 
 function getResetPasswordRoutes() {
     const router = express.Router()
@@ -21,7 +22,7 @@ function checkAuthentication(req) {
     if (req.user) {
         console.log(req.user);
         isAuthenticated = true;
-    } 
+    }
 }
 
 function resetPasswordGET(req, res) {
@@ -35,7 +36,10 @@ function resetPasswordGET(req, res) {
         } else {
             if (!foundUser) {
                 console.log("Password reset token has expired or is invalid");
-                res.redirect("/forgotPassword");
+                res.render("forgot-password", {
+                    isAuthenticated: isAuthenticated,
+                    error: Messages.passwordReset_invalidToken
+                });
             } else {
                 res.render("reset-password", {
                     isAuthenticated: isAuthenticated,
@@ -58,15 +62,19 @@ function resetPasswordPOST(req, res) {
             User.findOne({ resetPasswordToken: token }, (err, foundUser) => {
                 if (err) {
                     console.log(err);
-                    res.redirect("resetPassword", {
+                    res.render("forgot-password", {
                         isAuthenticated: isAuthenticated,
-                        error: Messages.email_Reset_Confirmation
+                        error: Messages.passwordReset_invalidToken
                     });
                 } else {
                     // foundUser.password = req.body.password;
                     foundUser.setPassword(req.body.password, (err, thing) => {
                         if (err) {
                             console.log(err);
+                            res.render("reset-password", {
+                                isAuthenticated: isAuthenticated,
+                                error: Messages.passwordReset_ResetErrorMsg
+                            })
                         } else {
                             foundUser.resetPasswordToken = undefined;
                             foundUser.resetPasswordExpires = undefined;
@@ -104,16 +112,27 @@ function resetPasswordPOST(req, res) {
 
             transporter.sendMail(message, (err, info) => {
                 if (err) {
-                    console.log('Error occurred. ' + err.message);
                     return process.exit(1);
                 }
 
                 console.log('Confirmation message sent: %s', info.messageId);
-                done();
+                done(err, email);
             });
         }
-    ], (err) => {
-        res.redirect("/login");
+    ], (err, email) => {
+        if (err) {
+            res.render("reset-password", {
+                isAuthenticated: false,
+                error: Messages.passwordResetResetErrorMsg(email)
+            });
+        } else {
+            res.render("login", {
+                isAuthenticated: false,
+                message: Messages.passwordResetResetConfirmationMsg(email),
+                messages: req.flash("error_msg")
+            })
+        }
+
     });
 
 }
