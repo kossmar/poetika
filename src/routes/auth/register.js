@@ -1,7 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const async = require("async");
-const { User } = require("../../../models/User");
+const { User } = require("../../models/User");
 
 // Register Routes
 

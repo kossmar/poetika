@@ -4,7 +4,8 @@ const passport = require("passport");
 const async = require("async");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const { User } = require("../../../models/User");
+const { User } = require("../../models/User");
+const Messages = require("../../messages");
 
 function getResetPasswordRoutes() {
     const router = express.Router()
@@ -59,7 +60,7 @@ function resetPasswordPOST(req, res) {
                     console.log(err);
                     res.redirect("resetPassword", {
                         isAuthenticated: isAuthenticated,
-                        resetAlert: resetAlert
+                        error: Messages.email_Reset_Confirmation
                     });
                 } else {
                     // foundUser.password = req.body.password;
@@ -92,7 +93,6 @@ function resetPasswordPOST(req, res) {
 
             const email = foundUser.username;
             const recipient = email + " <" + email + ">";
-            console.log("RECIPIENT of Confirmation: " + recipient);
 
             let message = {
                 from: 'Poetica <help@poetica.com>',

@@ -4,7 +4,10 @@ const passport = require("passport");
 const async = require("async");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const { User } = require("../../../models/User");
+const { User } = require("../../models/User");
+const Messages = require("../../messages");
+
+
 
 
 
@@ -54,7 +57,7 @@ function forgotPasswordPOST(req, res) {
                             done(err, token, foundUser);
                         });
                     } else {
-                        const error = "This e-mail address is not registered"
+                        const error = Messages.emailReset_wrongEmailMsg;
                         res.render("forgot-password", {
                             isAuthenticated: false,
                             error: error
@@ -97,7 +100,7 @@ function forgotPasswordPOST(req, res) {
                 console.log('Message sent: %s', info.messageId);
                 // Preview only available when sending through an Ethereal account
                 console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-                const message = `A reset link has been sent to ${email}`
+                const message = Messages.emailReset_ConfirmationMsg(email);
                 res.render("forgot-password", {
                     isAuthenticated: false,
                     message: message
@@ -106,10 +109,14 @@ function forgotPasswordPOST(req, res) {
             });
         }
     ], (err, foundUser) => {
-        console.log("FRICK");
         if (err) {
             throw new Error(err);
         }
+        const error = Messages.emailReset_GenericErrorMsg(err);
+        res.render("forgot-password", {
+            isAuthenticated: false,
+            error: error
+        })
     });
 
 }

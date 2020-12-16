@@ -23,8 +23,8 @@ const findOrCreate = require('mongoose-findorcreate');
 
 const {getRoutes} = require('./src/routes');
 
-const { User } = require("./models/User");
-const { Poem } = require("./models/Poem");
+const { User } = require("./src/models/User");
+const { Poem } = require("./src/models/Poem");
 
 const app = express();
 
