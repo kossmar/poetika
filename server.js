@@ -20,7 +20,10 @@ const { doesNotMatch } = require("assert");
 const async = require("async");
 const flash = require("connect-flash");
 const findOrCreate = require('mongoose-findorcreate');
+const {getRoutes} = require('./src/routes');
 
+const { User } = require("./models/User");
+const { Poem } = require("./models/Poem");
 
 const app = express();
 
@@ -53,21 +56,6 @@ mongoose.connect("mongodb+srv://mar-admin:" + process.env.MONGO_ADMIN_PASSWORD +
 });
 
 mongoose.set("useCreateIndex", true);
-
-const userSchema = mongoose.Schema({
-    email: String,
-    password: String,
-    penName: String,
-    googleId: String,
-    facebookId: String,
-    resetPasswordToken: String,
-    resetPasswordExpires: Date
-});
-
-userSchema.plugin(passportLocalMongoose);
-userSchema.plugin(findOrCreate);
-
-const User = new mongoose.model("User", userSchema);
 
 // Passport Local Strategy
 passport.use(
@@ -143,16 +131,7 @@ passport.deserializeUser(function (id, done) {
 
 var isAuthenticated = false;
 
-const poemSchema = mongoose.Schema({
-    title: String,
-    body: String,
-    penName: String,
-    userId: String,
-    timeStamp: Number,
-});
-
-const Poem = new mongoose.model("Poem", poemSchema);
-
+app.use("/", getRoutes())
 
 // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)
 
@@ -163,6 +142,7 @@ app.get("/", (req, res) => {
     if (isAuthenticated) {
         currentUser = req.user;
     }
+
     Poem.find((err, foundPoems) => {
         if (err) {
             console.log("An Error Occurred While finding Poems: " + err);
@@ -194,91 +174,91 @@ app.get("/poems/:poemId", (req, res) => {
 
 // AUTHENTICATE
 
-app.get("/auth/login", (req, res) => {
-    res.render("login", {
-        isAuthenticated: isAuthenticated,
-        messages: req.flash("error_msg")
-    });
+// app.get("/auth/login", (req, res) => {
+//     res.render("login", {
+//         isAuthenticated: isAuthenticated,
+//         messages: req.flash("error_msg")
+//     });
 
-});
+// });
 
-app.post("/auth/login", (req, res, next) => {
-    passport.authenticate("local",
-        {
-            successRedirect: "/",
-            failureRedirect: "/login",
-            failureFlash: true
-        })(req, res, next);
-});
+// app.post("/auth/login", (req, res, next) => {
+//     passport.authenticate("local",
+//         {
+//             successRedirect: "/",
+//             failureRedirect: "/auth/login",
+//             failureFlash: true
+//         })(req, res, next);
+// });
 
-app.get("/auth/register", (req, res) => {
-    res.render("register", {
-        isAuthenticated: isAuthenticated,
-    });
-})
+// app.get("/auth/register", (req, res) => {
+//     res.render("register", {
+//         isAuthenticated: isAuthenticated,
+//     });
+// })
 
-app.post("/auth/register", async (req, res) => {
-    const { penName, username, password, passwordConf } = req.body;
+// app.post("/auth/register", async (req, res) => {
+//     const { penName, username, password, passwordConf } = req.body;
 
-    const errors = [];
+//     const errors = [];
 
-    if (!penName || !username || !password || !passwordConf) {
-        errors.push({ msg: "Please fill in all fields" });
-    }
+//     if (!penName || !username || !password || !passwordConf) {
+//         errors.push({ msg: "Please fill in all fields" });
+//     }
 
-    // Check if passwords match
-    if (password !== passwordConf) {
-        errors.push({ msg: "Passwords don't match" })
-    }
+//     // Check if passwords match
+//     if (password !== passwordConf) {
+//         errors.push({ msg: "Passwords don't match" })
+//     }
 
-    // Check if pen name is taken
-    let promise = new Promise((resolve, reject) => {
-        User.findOne({ penName: penName }, (err, foundUser) => {
-            if (foundUser) {
-                errors.push({ msg: "Pen Name is taken" });
-                resolve();
-            } else {
-                resolve();
-            }
-        })
-    })
+//     // Check if pen name is taken
+//     let promise = new Promise((resolve, reject) => {
+//         User.findOne({ penName: penName }, (err, foundUser) => {
+//             if (foundUser) {
+//                 errors.push({ msg: "Pen Name is taken" });
+//                 resolve();
+//             } else {
+//                 resolve();
+//             }
+//         })
+//     })
 
-    let promise2 = new Promise((resolve, reject) => {
-        // Check if e-mail address is registered
-        User.findOne({ username: username }, (err, foundUser) => {
-            if (foundUser) {
-                errors.push({ msg: "This e-mail address is already registered" });
-                resolve();
-            } else {
-                User.register({ username: username, penName: penName }, password, (err, user) => {
-                    if (err) {
-                        console.log(err);
-                        res.redirect("/register");
-                    } else {
-                        passport.authenticate("local")(req, res, function () {
-                            res.redirect("/");
-                        });
-                    }
-                });
-            }
-        });
-    })
+//     let promise2 = new Promise((resolve, reject) => {
+//         // Check if e-mail address is registered
+//         User.findOne({ username: username }, (err, foundUser) => {
+//             if (foundUser) {
+//                 errors.push({ msg: "This e-mail address is already registered" });
+//                 resolve();
+//             } else {
+//                 User.register({ username: username, penName: penName }, password, (err, user) => {
+//                     if (err) {
+//                         console.log(err);
+//                         res.redirect("/register");
+//                     } else {
+//                         passport.authenticate("local")(req, res, function () {
+//                             res.redirect("/");
+//                         });
+//                     }
+//                 });
+//             }
+//         });
+//     })
 
-    let result = await promise;
-    let result2 = await promise2;
+//     let result = await promise;
+//     let result2 = await promise2;
 
-    if (errors.length > 0) {
-        res.render("register", {
-            isAuthenticated: isAuthenticated,
-            errors: errors,
-            penName: penName,
-            username: username,
-            password: password,
-            passwordConf: passwordConf
-        })
-    }
+//     if (errors.length > 0) {
+//         res.render("register", {
+//             isAuthenticated: isAuthenticated,
+//             errors: errors,
+//             penName: penName,
+//             username: username,
+//             password: password,
+//             passwordConf: passwordConf
+//         })
+//     }
 
-});
+// });
 
 // Facebook Auth 
 app.get('/auth/facebook',
@@ -310,95 +290,95 @@ app.get('/auth/google/poetika',
 
 // RESET PASSWORD
 
-var forgotAlert = {
-    state: false,
-    message: ""
-}
+// var forgotAlert = {
+//     state: false,
+//     message: ""
+// }
 
-app.get("/auth/forgotPassword", (req, res) => {
+// app.get("/auth/forgotPassword", (req, res) => {
 
-    res.render("forgot-password", {
-        isAuthenticated: isAuthenticated,
-        alert: forgotAlert
-    });
-    forgotAlert.state = false;
-    forgotAlert.message = "";
-});
+//     res.render("forgot-password", {
+//         isAuthenticated: isAuthenticated,
+//         alert: forgotAlert
+//     });
+//     forgotAlert.state = false;
+//     forgotAlert.message = "";
+// });
 
-app.post("/auth/forgotPassword", (req, res) => {
+// app.post("/auth/forgotPassword", (req, res) => {
 
-    const email = req.body.email
-    console.log(email);
-    async.waterfall([
-        (done) => {
-            crypto.randomBytes(20, (err, buf) => {
-                var token = buf.toString("hex");
-                done(err, token);
-            });
-        },
-        (token, done) => {
-            User.findOne({ username: email }, (err, foundUser) => {
-                if (err) {
-                    console.log(err);
-                } else {
-                    if (foundUser) {
-                        console.log(foundUser);
-                        foundUser.resetPasswordToken = token,
-                            foundUser.resetPasswordExpires = Date.now() + 3600000;
+//     const email = req.body.email
+//     console.log(email);
+//     async.waterfall([
+//         (done) => {
+//             crypto.randomBytes(20, (err, buf) => {
+//                 var token = buf.toString("hex");
+//                 done(err, token);
+//             });
+//         },
+//         (token, done) => {
+//             User.findOne({ username: email }, (err, foundUser) => {
+//                 if (err) {
+//                     console.log(err);
+//                 } else {
+//                     if (foundUser) {
+//                         console.log(foundUser);
+//                         foundUser.resetPasswordToken = token,
+//                             foundUser.resetPasswordExpires = Date.now() + 3600000;
 
-                        foundUser.save((err) => {
-                            done(err, token, foundUser);
-                        });
-                    }
-                }
-            });
-        },
-        (token, foundUser, done) => {
-            let transporter = nodemailer.createTransport({
-                host: "smtp-relay.sendinblue.com",
-                port: 587,
-                secure: false,
-                auth: {
-                    user: process.env.SENDER_EMAIL,
-                    pass: process.env.SENDER_PASSWORD
-                }
-            });
+//                         foundUser.save((err) => {
+//                             done(err, token, foundUser);
+//                         });
+//                     }
+//                 }
+//             });
+//         },
+//         (token, foundUser, done) => {
+//             let transporter = nodemailer.createTransport({
+//                 host: "smtp-relay.sendinblue.com",
+//                 port: 587,
+//                 secure: false,
+//                 auth: {
+//                     user: process.env.SENDER_EMAIL,
+//                     pass: process.env.SENDER_PASSWORD
+//                 }
+//             });
 
-            const recipient = email + " <" + email + ">";
-            console.log("RECIPIENT " + recipient);
+//             const recipient = email + " <" + email + ">";
+//             console.log("RECIPIENT " + recipient);
 
-            let message = {
-                from: 'Poetica <help@poetica.com>',
-                to: recipient,
-                subject: "Poetica Password Reset",
-                text: "",
-                html: "<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
-                    "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
-                    "http://" + req.headers.host + "/resetPassword/" + token + "\n\n</p>" +
-                    "<p>If you did not request this, please ignore this email and your password will remain unchanged.\n</p>"
-            };
+//             let message = {
+//                 from: 'Poetica <help@poetica.com>',
+//                 to: recipient,
+//                 subject: "Poetica Password Reset",
+//                 text: "",
+//                 html: "<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
+//                     "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
+//                     "http://" + req.headers.host + "/resetPassword/" + token + "\n\n</p>" +
+//                     "<p>If you did not request this, please ignore this email and your password will remain unchanged.\n</p>"
+//             };
 
-            transporter.sendMail(message, (err, info) => {
-                if (err) {
-                    console.log('Error occurred. ' + err.message);
-                    return process.exit(1);
-                }
+//             transporter.sendMail(message, (err, info) => {
+//                 if (err) {
+//                     console.log('Error occurred. ' + err.message);
+//                     return process.exit(1);
+//                 }
 
-                console.log('Message sent: %s', info.messageId);
-                // Preview only available when sending through an Ethereal account
-                console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-                forgotAlert.state = true;
-                forgotAlert.message = "A password reset link has been sent to " + email + ". The link will expire in 1 hour."
-                done();
-                // res.redirect("forgotPassword");
-            });
-        }
-    ], (err) => {
-        if (err) return next(err);
-        res.redirect("/forgotPassword");
-    });
+//                 console.log('Message sent: %s', info.messageId);
+//                 // Preview only available when sending through an Ethereal account
+//                 console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+//                 forgotAlert.state = true;
+//                 forgotAlert.message = "A password reset link has been sent to " + email + ". The link will expire in 1 hour."
+//                 done();
+//                 // res.redirect("forgotPassword");
+//             });
+//         }
+//     ], (err) => {
+//         if (err) return next(err);
+//         res.redirect("/forgotPassword");
+//     });
 
-});
+// });
 
 var resetAlert = {
     state: false,
