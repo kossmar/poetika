@@ -18,13 +18,14 @@ function passwordResetResetErrorMsg(err) {
 }
 
 module.exports = {
-    // Success
+    // Confirmation
     passwordResetLinkConfirmationMsg,
     passwordResetResetConfirmationMsg,
 
     // Error
     passwordReset_WrongEmailMsg: "This email is not registered",
     passwordReset_InvalidToken: "Your reset link is invalid or has expired. Please try again",
+    passwordReset_LinkEmailErrorMsg: "We were unable to send a reset link. Please try again. If the problem persists, please contact us.",
     passwordResetGenericErrorMsg,
     passwordResetResetErrorMsg
 }

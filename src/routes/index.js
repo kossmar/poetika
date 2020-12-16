@@ -3,6 +3,9 @@ const { getLoginRoutes } = require("./auth/login");
 const { getRegisterRoutes } = require("./auth/register");
 const { getForgotPasswordRoutes } = require("./auth/forgotPassword");
 const { getResetPasswordRoutes } = require("./auth/resetPassword");
+const { getFacebookAuthRoutes } = require("./auth/facebook");
+const { getGoogleAuthRoutes } = require("./auth/google");
+
 
 function getRoutes() {
     const router = express.Router()
@@ -11,7 +14,9 @@ function getRoutes() {
             getLoginRoutes(),
             getRegisterRoutes(),
             getForgotPasswordRoutes(),
-            getResetPasswordRoutes()
+            getResetPasswordRoutes(),
+            getFacebookAuthRoutes(),
+            getGoogleAuthRoutes()
         ])
 
     // router.use("/poems", getPoemsRoutes())

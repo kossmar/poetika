@@ -54,8 +54,6 @@ function resetPasswordPOST(req, res) {
 
     checkAuthentication(req);
 
-    console.log(req.body.password);
-
     async.waterfall([
         (done) => {
             const token = req.params.token;
@@ -78,7 +76,6 @@ function resetPasswordPOST(req, res) {
                         } else {
                             foundUser.resetPasswordToken = undefined;
                             foundUser.resetPasswordExpires = undefined;
-                            console.log("FOUND USER before sending confirmation email " + foundUser);
 
                             foundUser.save((err) => {
                                 done(err, foundUser);
@@ -115,7 +112,6 @@ function resetPasswordPOST(req, res) {
                     return process.exit(1);
                 }
 
-                console.log('Confirmation message sent: %s', info.messageId);
                 done(err, email);
             });
         }

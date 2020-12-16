@@ -59,6 +59,14 @@ mongoose.connect("mongodb+srv://mar-admin:" + process.env.MONGO_ADMIN_PASSWORD +
 
 mongoose.set("useCreateIndex", true);
 
+var domainURL = "https://poetika.herokuapp.com"
+
+let port = process.env.PORT;
+if (port == null || port == "") {
+    port = 3000;
+    domainURL = "http://localHost:3000"
+}
+
 // Passport Local Strategy
 passport.use(
     new LocalStrategy(
@@ -85,7 +93,7 @@ passport.use(
     new FacebookStrategy({
         clientID: process.env.FACEBOOK_ID,
         clientSecret: process.env.FACEBOOK_SECRET,
-        callbackURL: "https://poetika.herokuapp.com/auth/facebook/poetika"
+        callbackURL: `${domainURL}/auth/facebook/poetika`
     },
         (accessToken, refreshToken, profile, cb) => {
             console.log(profile);
@@ -102,7 +110,7 @@ passport.use(
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://poetika.herokuapp.com/auth/google/poetika",
+    callbackURL: `${domainURL}/auth/google/poetika`,
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
   },
   function(accessToken, refreshToken, profile, cb) {
@@ -176,34 +184,11 @@ app.get("/poems/:poemId", (req, res) => {
 
 // AUTHENTICATE
 
-// Facebook Auth 
-app.get('/auth/facebook',
-    passport.authenticate('facebook'));
-
-app.get('/auth/facebook/poetika',
-    passport.authenticate('facebook', { failureRedirect: '/login' }),
-    function (req, res) {
-        // Successful authentication, redirect home.
-        res.redirect('/');
-    });
-
 app.post("/auth/logout", (req, res) => {
     req.logout();
     isAuthenticated = false;
     res.redirect("/");
 });
-
-// Google Auth
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile'] }));
-
-app.get('/auth/google/poetika', 
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    res.redirect('/');
-  });
-
 
 // COMPOSE
 
@@ -291,10 +276,10 @@ app.post("/account/change_pen_name", (req, res) => {
     }
 });
 
-let port = process.env.PORT;
-if (port == null || port == "") {
-    port = 3000;
-}
+// let port = process.env.PORT;
+// if (port == null || port == "") {
+//     port = 3000;
+// }
 app.listen(port, () => {
     console.log("Server started running on port 3000");
 });

@@ -78,7 +78,6 @@ function forgotPasswordPOST(req, res) {
             });
 
             const recipient = email + " <" + email + ">";
-            console.log("RECIPIENT " + recipient);
 
             let message = {
                 from: 'Poetica <help@poetica.com>',
@@ -94,12 +93,13 @@ function forgotPasswordPOST(req, res) {
             transporter.sendMail(message, (err, info) => {
                 if (err) {
                     console.log('Error occurred. ' + err.message);
+                    res.render("forgot-password", {
+                        isAuthenticated: false,
+                        error: Messages.passwordReset_LinkEmailErrorMsg
+                    })
                     return process.exit(1);
                 }
 
-                console.log('Message sent: %s', info.messageId);
-                // Preview only available when sending through an Ethereal account
-                console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
                 done(err, email);
             });
         }
