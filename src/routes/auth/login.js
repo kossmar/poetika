@@ -6,6 +6,7 @@ function getLoginRoutes() {
     router.route("/login")
         .get(loginGET)
         .post(loginPOST)
+    router.post("/logout", logoutPOST)
     return router
 }
 
@@ -28,6 +29,12 @@ function loginPOST(req, res, next) {
             failureRedirect: "/auth/login",
             failureFlash: true
         })(req, res, next);
+}
+
+function logoutPOST(req, res) {
+    req.logout();
+    isAuthenticated = false;
+    res.redirect("/");
 }
 
 module.exports = { getLoginRoutes }
