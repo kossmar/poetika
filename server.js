@@ -166,45 +166,35 @@ app.get("/about", (req, res) => {
 
 // ACCOUNT 
 
-// app.get("/account/profile", (req, res) => {
+
+// app.post("/account/change_pen_name", (req, res) => {
 //     if (isAuthenticated) {
-//         res.render("account", {
-//             isAuthenticated: isAuthenticated,
-//             currentUser: req.user
-//         });
+//         const currentUserId = req.user.id;
+//         const newPenName = req.body.newPenName;
+//         User.findOne({ _id: currentUserId }, (err, foundUser) => {
+//             if (foundUser) {
+//                 console.log(foundUser);
+//                 // console.log("currentPenName: " + foundUser.penName);
+//                 // console.log("newPenName: " + newPenName);
+//                 foundUser.penName = newPenName;
+
+//                 foundUser.save()
+//                 console.log(foundUser);
+//                 // console.log("currentUserId: " + currentUserId);
+//                 Poem.updateMany({ userId: currentUserId }, { penName: newPenName }, (err, foundPoems) => {
+//                     if (err) {
+//                         console.log(err);
+//                     } else {
+//                         // console.log("Updated Docs : ", foundPoems);
+//                         res.redirect("/account");
+//                     }
+//                 });
+//             }
+//         })
 //     } else {
 //         res.redirect("/auth/login");
 //     }
 // });
-
-app.post("/account/change_pen_name", (req, res) => {
-    if (isAuthenticated) {
-        const currentUserId = req.user.id;
-        const newPenName = req.body.newPenName;
-        User.findOne({ _id: currentUserId }, (err, foundUser) => {
-            if (foundUser) {
-                console.log(foundUser);
-                // console.log("currentPenName: " + foundUser.penName);
-                // console.log("newPenName: " + newPenName);
-                foundUser.penName = newPenName;
-
-                foundUser.save()
-                console.log(foundUser);
-                // console.log("currentUserId: " + currentUserId);
-                Poem.updateMany({ userId: currentUserId }, { penName: newPenName }, (err, foundPoems) => {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        // console.log("Updated Docs : ", foundPoems);
-                        res.redirect("/account");
-                    }
-                });
-            }
-        })
-    } else {
-        res.redirect("/auth/login");
-    }
-});
 
 
 app.listen(port, () => {
