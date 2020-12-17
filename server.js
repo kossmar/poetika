@@ -7,18 +7,12 @@ const ejs = require("ejs");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
-// const passport = require("passport");
 const { passport } = require("./src/workers/passportWorker");
-const LocalStrategy = require("passport-local").Strategy;
-const FacebookStrategy = require("passport-facebook").Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passportLocalMongoose = require("passport-local-mongoose");
 const { doesNotMatch } = require("assert");
 const flash = require("connect-flash");
-const findOrCreate = require('mongoose-findorcreate');
+
 const {getRoutes} = require('./src/routes');
-const { User } = require("./src/models/User");
-const { Poem } = require("./src/models/Poem");
 
 const app = express();
 
