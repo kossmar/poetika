@@ -166,58 +166,58 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/poems/:poemId", (req, res) => {
+// app.get("/poems/poem/:poemId", (req, res) => {
 
-    const requestedPoemId = req.params.poemId;
+//     const requestedPoemId = req.params.poemId;
 
-    Poem.findOne({ _id: requestedPoemId }, (err, foundPoem) => {
-        console.log(foundPoem);
-        if (err) {
-        } else {
-            res.render("poem", {
-                isAuthenticated: isAuthenticated,
-                poem: foundPoem
-            });
-        }
-    });
-});
+//     Poem.findOne({ _id: requestedPoemId }, (err, foundPoem) => {
+//         console.log(foundPoem);
+//         if (err) {
+//         } else {
+//             res.render("poem", {
+//                 isAuthenticated: isAuthenticated,
+//                 poem: foundPoem
+//             });
+//         }
+//     });
+// });
 
-// COMPOSE
+// // COMPOSE
 
-app.get("/poems/compose", (req, res) => {
-    // console.log(req.user.id);
-    console.log("POOPIE");
-    const isAuthenticated = req.isAuthenticated();
-    if (isAuthenticated) {
-        res.render("compose", {
-            isAuthenticated: isAuthenticated,
-        });
-    } else {
-        res.redirect("/auth/login");
-    }
-});
+// app.get("/poems/compose", (req, res) => {
+//     // console.log(req.user.id);
+//     console.log("POOPIE");
+//     const isAuthenticated = req.isAuthenticated();
+//     if (isAuthenticated) {
+//         res.render("compose", {
+//             isAuthenticated: isAuthenticated,
+//         });
+//     } else {
+//         res.redirect("/auth/login");
+//     }
+// });
 
-app.post("/poems/compose", (req, res) => {
-    console.log("NEW POEM: " + req.body);
-    const title = req.body.title;
-    const body = req.body.body;
-    const newPoem = new Poem({
-        title: title,
-        body: body,
-        timeStamp: new Date(),
-        penName: req.user.penName,
-        userId: req.user.id
-    });
+// app.post("/poems/compose", (req, res) => {
+//     console.log("NEW POEM: " + req.body);
+//     const title = req.body.title;
+//     const body = req.body.body;
+//     const newPoem = new Poem({
+//         title: title,
+//         body: body,
+//         timeStamp: new Date(),
+//         penName: req.user.penName,
+//         userId: req.user.id
+//     });
 
-    console.log("NEW POEM: " + newPoem);
-    newPoem.save((err) => {
-        if (err) {
-            console.log(err)
-        } else {
-            res.redirect("/");
-        }
-    });
-});
+//     console.log("NEW POEM: " + newPoem);
+//     newPoem.save((err) => {
+//         if (err) {
+//             console.log(err)
+//         } else {
+//             res.redirect("/");
+//         }
+//     });
+// });
 
 // ABOUT
 

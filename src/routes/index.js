@@ -5,8 +5,8 @@ const { getForgotPasswordRoutes } = require("./auth/forgotPassword");
 const { getResetPasswordRoutes } = require("./auth/resetPassword");
 const { getFacebookAuthRoutes } = require("./auth/facebook");
 const { getGoogleAuthRoutes } = require("./auth/google");
-// const { getPoemIdRoutes } = require("./poems/poemId");
-// const { getComposeRoutes } = require("./poems/compose");
+const { getPoemIdRoutes } = require("./poems/poemId");
+const { getComposeRoutes } = require("./poems/compose");
 
 function getRoutes() {
     const router = express.Router()
@@ -20,11 +20,11 @@ function getRoutes() {
             getGoogleAuthRoutes(),
         ])
 
-    // router.use("/poems",
-    //     [
-    //         getPoemIdRoutes(),
-    //         getComposeRoutes()
-    //     ])
+    router.use("/poems",
+        [
+            getPoemIdRoutes(),
+            getComposeRoutes()
+        ])
         
     return router
 }
