@@ -7,12 +7,12 @@ const ejs = require("ejs");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
-const passport = require("passport");
+// const passport = require("passport");
+const { passport } = require("./src/workers/passportWorker");
 const LocalStrategy = require("passport-local").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passportLocalMongoose = require("passport-local-mongoose");
-const alert = require("alert");
 const { doesNotMatch } = require("assert");
 const flash = require("connect-flash");
 const findOrCreate = require('mongoose-findorcreate');
@@ -53,83 +53,11 @@ mongoose.connect("mongodb+srv://mar-admin:" + process.env.MONGO_ADMIN_PASSWORD +
 
 mongoose.set("useCreateIndex", true);
 
-var domainURL = "https://poetika.herokuapp.com"
-
 let port = process.env.PORT;
 if (port == null || port == "") {
     port = 3000;
     domainURL = "http://localHost:3000"
 }
-
-// Passport Local Strategy
-passport.use(
-    new LocalStrategy(
-        function (username, password, done) {
-            User.findOne({ username: username }, function (err, user) {
-                if (err) { return done(err); }
-                if (!user) {
-                    return done(null, false, { message: 'Incorrect E-mail.' });
-                }
-                user.authenticate(password, (err, model, passwordError) => {
-                    if (passwordError) {
-                        return done(null, false, { message: 'Incorrect Password.' });
-                    } else {
-                        return done(null, user);
-                    }
-                })
-            });
-
-        }
-    ));
-
-// Passport Facebook Strategy
-passport.use(
-    new FacebookStrategy({
-        clientID: process.env.FACEBOOK_ID,
-        clientSecret: process.env.FACEBOOK_SECRET,
-        callbackURL: `${domainURL}/auth/facebook/poetika`
-    },
-        (accessToken, refreshToken, profile, cb) => {
-            console.log(profile);
-            User.findOrCreate({ facebookId: profile.id }, (err, user) => {
-                if (!user.penName) {
-                    user.penName = profile.displayName;
-                    user.save();
-                }
-                return cb(err, user);
-            })
-        }));
-
-// Passport Google Strategy
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${domainURL}/auth/google/poetika`,
-    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
-  },
-  function(accessToken, refreshToken, profile, cb) {
-      console.log(profile);
-    User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        console.log(user);
-        if (!user.penName) {
-            user.penName = profile.displayName;
-            user.save();
-        }
-      return cb(err, user);
-    });
-  }
-));
-
-passport.serializeUser((user, done) => {
-    done(null, user.id);
-});
-
-passport.deserializeUser(function (id, done) {
-    User.findById(id, (err, user) => {
-        done(err, user);
-    });
-});
-
 
 app.use("/", getRoutes())
 

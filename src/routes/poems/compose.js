@@ -11,7 +11,6 @@ function getComposeRoutes() {
 }
 
 function composeGET(req, res) {
-    console.log("POOPIE");
     const isAuthenticated = req.isAuthenticated();
     if (isAuthenticated) {
         res.render("compose", {
