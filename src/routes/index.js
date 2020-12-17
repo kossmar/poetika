@@ -5,7 +5,8 @@ const { getForgotPasswordRoutes } = require("./auth/forgotPassword");
 const { getResetPasswordRoutes } = require("./auth/resetPassword");
 const { getFacebookAuthRoutes } = require("./auth/facebook");
 const { getGoogleAuthRoutes } = require("./auth/google");
-
+// const { getPoemIdRoutes } = require("./poems/poemId");
+// const { getComposeRoutes } = require("./poems/compose");
 
 function getRoutes() {
     const router = express.Router()
@@ -16,10 +17,15 @@ function getRoutes() {
             getForgotPasswordRoutes(),
             getResetPasswordRoutes(),
             getFacebookAuthRoutes(),
-            getGoogleAuthRoutes()
+            getGoogleAuthRoutes(),
         ])
 
-    // router.use("/poems", getPoemsRoutes())
+    // router.use("/poems",
+    //     [
+    //         getPoemIdRoutes(),
+    //         getComposeRoutes()
+    //     ])
+        
     return router
 }
 

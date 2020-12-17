@@ -182,25 +182,18 @@ app.get("/poems/:poemId", (req, res) => {
     });
 });
 
-// AUTHENTICATE
-
-app.post("/auth/logout", (req, res) => {
-    req.logout();
-    isAuthenticated = false;
-    res.redirect("/");
-});
-
 // COMPOSE
 
 app.get("/poems/compose", (req, res) => {
     // console.log(req.user.id);
+    console.log("POOPIE");
     const isAuthenticated = req.isAuthenticated();
     if (isAuthenticated) {
         res.render("compose", {
             isAuthenticated: isAuthenticated,
         });
     } else {
-        res.redirect("/login");
+        res.redirect("/auth/login");
     }
 });
 

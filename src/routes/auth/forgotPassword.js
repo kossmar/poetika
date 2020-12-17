@@ -8,10 +8,6 @@ const { User } = require("../../models/User");
 const Messages = require("../../messages");
 
 
-
-
-
-
 function getForgotPasswordRoutes() {
     const router = express.Router()
     router.route("/forgotPassword")
