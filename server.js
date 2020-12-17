@@ -13,16 +13,11 @@ const FacebookStrategy = require("passport-facebook").Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passportLocalMongoose = require("passport-local-mongoose");
 const alert = require("alert");
-const nodemailer = require("nodemailer");
 const SMTPConnection = require("nodemailer/lib/smtp-connection");
-const crypto = require("crypto");
 const { doesNotMatch } = require("assert");
-const async = require("async");
 const flash = require("connect-flash");
 const findOrCreate = require('mongoose-findorcreate');
-
 const {getRoutes} = require('./src/routes');
-
 const { User } = require("./src/models/User");
 const { Poem } = require("./src/models/Poem");
 
@@ -126,9 +121,6 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
-
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
@@ -142,8 +134,6 @@ passport.deserializeUser(function (id, done) {
 var isAuthenticated = false;
 
 app.use("/", getRoutes())
-
-// console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)
 
 app.get("/", (req, res) => {
     var currentUser = ""
@@ -166,59 +156,6 @@ app.get("/", (req, res) => {
     });
 });
 
-// app.get("/poems/poem/:poemId", (req, res) => {
-
-//     const requestedPoemId = req.params.poemId;
-
-//     Poem.findOne({ _id: requestedPoemId }, (err, foundPoem) => {
-//         console.log(foundPoem);
-//         if (err) {
-//         } else {
-//             res.render("poem", {
-//                 isAuthenticated: isAuthenticated,
-//                 poem: foundPoem
-//             });
-//         }
-//     });
-// });
-
-// // COMPOSE
-
-// app.get("/poems/compose", (req, res) => {
-//     // console.log(req.user.id);
-//     console.log("POOPIE");
-//     const isAuthenticated = req.isAuthenticated();
-//     if (isAuthenticated) {
-//         res.render("compose", {
-//             isAuthenticated: isAuthenticated,
-//         });
-//     } else {
-//         res.redirect("/auth/login");
-//     }
-// });
-
-// app.post("/poems/compose", (req, res) => {
-//     console.log("NEW POEM: " + req.body);
-//     const title = req.body.title;
-//     const body = req.body.body;
-//     const newPoem = new Poem({
-//         title: title,
-//         body: body,
-//         timeStamp: new Date(),
-//         penName: req.user.penName,
-//         userId: req.user.id
-//     });
-
-//     console.log("NEW POEM: " + newPoem);
-//     newPoem.save((err) => {
-//         if (err) {
-//             console.log(err)
-//         } else {
-//             res.redirect("/");
-//         }
-//     });
-// });
-
 // ABOUT
 
 app.get("/about", (req, res) => {
@@ -229,16 +166,16 @@ app.get("/about", (req, res) => {
 
 // ACCOUNT 
 
-app.get("/account", (req, res) => {
-    if (isAuthenticated) {
-        res.render("account", {
-            isAuthenticated: isAuthenticated,
-            currentUser: req.user
-        });
-    } else {
-        res.redirect("/auth/login");
-    }
-});
+// app.get("/account/profile", (req, res) => {
+//     if (isAuthenticated) {
+//         res.render("account", {
+//             isAuthenticated: isAuthenticated,
+//             currentUser: req.user
+//         });
+//     } else {
+//         res.redirect("/auth/login");
+//     }
+// });
 
 app.post("/account/change_pen_name", (req, res) => {
     if (isAuthenticated) {
@@ -269,10 +206,7 @@ app.post("/account/change_pen_name", (req, res) => {
     }
 });
 
-// let port = process.env.PORT;
-// if (port == null || port == "") {
-//     port = 3000;
-// }
+
 app.listen(port, () => {
     console.log("Server started running on port 3000");
 });
