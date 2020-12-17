@@ -9,7 +9,7 @@
                 <div class="card-body">
 
                     <!-- Makes POST request to /register route -->
-                    <form action="/register" method="POST">
+                    <form action="/auth/register" method="POST">
                         <div class="form-group">
                             <label>Pen Name</label>
                             <input type="text" class="form-control" name="penName" value="<%= typeof penName != 'undefined' ? penName : '' %>">
@@ -28,7 +28,7 @@
                         </div>
                         <div>
                             <button type="submit" class="btn btn-dark">Register</button>
-                            <a href="/login" class="btn btn-link">Already have an account?</a>
+                            <a href="/auth/login" class="btn btn-link">Already have an account?</a>
                         </div>
                     </form>
 
