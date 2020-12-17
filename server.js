@@ -13,7 +13,6 @@ const FacebookStrategy = require("passport-facebook").Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passportLocalMongoose = require("passport-local-mongoose");
 const alert = require("alert");
-const SMTPConnection = require("nodemailer/lib/smtp-connection");
 const { doesNotMatch } = require("assert");
 const flash = require("connect-flash");
 const findOrCreate = require('mongoose-findorcreate');
@@ -131,71 +130,8 @@ passport.deserializeUser(function (id, done) {
     });
 });
 
-var isAuthenticated = false;
 
 app.use("/", getRoutes())
-
-app.get("/", (req, res) => {
-    var currentUser = ""
-    isAuthenticated = req.isAuthenticated();
-    console.log("Is Authenticated: " + isAuthenticated);
-    if (isAuthenticated) {
-        currentUser = req.user;
-    }
-
-    Poem.find((err, foundPoems) => {
-        if (err) {
-            console.log("An Error Occurred While finding Poems: " + err);
-        } else {
-            res.render("home", {
-                isAuthenticated: isAuthenticated,
-                poemArr: foundPoems,
-                currentUser: currentUser
-            });
-        }
-    });
-});
-
-// ABOUT
-
-app.get("/about", (req, res) => {
-    res.render("about", {
-        isAuthenticated: isAuthenticated
-    });
-});
-
-// ACCOUNT 
-
-
-// app.post("/account/change_pen_name", (req, res) => {
-//     if (isAuthenticated) {
-//         const currentUserId = req.user.id;
-//         const newPenName = req.body.newPenName;
-//         User.findOne({ _id: currentUserId }, (err, foundUser) => {
-//             if (foundUser) {
-//                 console.log(foundUser);
-//                 // console.log("currentPenName: " + foundUser.penName);
-//                 // console.log("newPenName: " + newPenName);
-//                 foundUser.penName = newPenName;
-
-//                 foundUser.save()
-//                 console.log(foundUser);
-//                 // console.log("currentUserId: " + currentUserId);
-//                 Poem.updateMany({ userId: currentUserId }, { penName: newPenName }, (err, foundPoems) => {
-//                     if (err) {
-//                         console.log(err);
-//                     } else {
-//                         // console.log("Updated Docs : ", foundPoems);
-//                         res.redirect("/account");
-//                     }
-//                 });
-//             }
-//         })
-//     } else {
-//         res.redirect("/auth/login");
-//     }
-// });
-
 
 app.listen(port, () => {
     console.log("Server started running on port 3000");

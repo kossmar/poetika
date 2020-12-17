@@ -8,6 +8,8 @@ const { getGoogleAuthRoutes } = require("./auth/google");
 const { getPoemIdRoutes } = require("./poems/poemId");
 const { getComposeRoutes } = require("./poems/compose");
 const { getProfileRoutes } = require("./account/profile");
+const { getHomeRoute } = require("./home/home");
+const { getAboutRoute } = require("./home/about");
 
 function getRoutes() {
     const router = express.Router()
@@ -27,11 +29,17 @@ function getRoutes() {
             getComposeRoutes()
         ])
 
-        router.use("/account",
+    router.use("/account",
         [
             getProfileRoutes()
         ])
-        
+
+    router.use("/",
+        [
+            getHomeRoute(),
+            getAboutRoute()
+        ])
+
     return router
 }
 
